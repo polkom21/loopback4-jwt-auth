@@ -32,6 +32,20 @@ export class MySequence implements SequenceHandler {
       // Authentication successful, proceed to invoke controller
       const args = await this.parseParams(request, route);
       const result = await this.invoke(route, args);
+
+      if (result?.authToken) {
+        const arrayOfToken = result.authToken.split('.');
+        response.cookie('headerpayload', `${arrayOfToken[0]}.${arrayOfToken[1]}`, {
+          expires: new Date(Date.now() + (1000 * 60 * 30)),
+          secure: true
+        })
+        response.cookie('signature', `${arrayOfToken[2]}`, {
+          httpOnly: true,
+          secure: true
+        })
+        result.authToken = 'ok';
+      }
+
       this.send(response, result);
     } catch (error) {
       //

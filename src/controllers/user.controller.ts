@@ -124,7 +124,7 @@ export class UserController {
             schema: {
               type: 'object',
               properties: {
-                token: {type: 'string'}
+                authToken: {type: 'string'}
               }
             }
           }
@@ -146,13 +146,13 @@ export class UserController {
         }
       }
     }) credentials: Credentials
-  ): Promise<{token: string}> {
+  ): Promise<{authToken: string}> {
     const user = await this.userService.verifyCredentials(credentials);
 
     const userProfile = this.userService.convertToUserProfile(user);
 
-    const token = await this.tokenService.generateToken(userProfile);
+    const authToken = await this.tokenService.generateToken(userProfile);
 
-    return {token}
+    return {authToken}
   }
 }
