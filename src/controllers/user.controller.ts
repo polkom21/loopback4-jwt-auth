@@ -24,7 +24,7 @@ export class UserController {
     public tokenService: TokenService,
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public passwordHasher: PasswordHasher,
-  ) {}
+  ) { }
 
   @post('/users', {
     description: 'Register new user',
@@ -111,7 +111,8 @@ export class UserController {
     currentUserProfile: UserProfile
   ): Promise<UserProfile> {
     currentUserProfile.id = currentUserProfile[securityId];
-    delete currentUserProfile[securityId];
+    currentUserProfile[securityId];
+    console.log(currentUserProfile);
     return currentUserProfile;
   }
 
