@@ -30,12 +30,18 @@ export class JWTAuthenticationStrategy
   }
 
   extractCredentials(request: Request): string {
-    if (!request.headers.authorization) {
+    const cookies = request.headers.cookie as string
+    const decodedCookies = decodeURIComponent(cookies).split(';')
+    const cookiesParsed = Object.fromEntries(decodedCookies.map(c => c.trim().split('=')))
+    if (!request.headers.authorization && (!cookiesParsed.headerpayload && !cookiesParsed.signature)) {
       throw new HttpErrors.Unauthorized(`Authorization header not found.`);
     }
 
     // for example : Bearer xxx.yyy.zzz
-    const authHeaderValue = request.headers.authorization;
+    let authHeaderValue = request.headers.authorization;
+    if (!authHeaderValue)
+      authHeaderValue = 'Bearer ' + cookiesParsed.headerpayload + '.' + cookiesParsed.signature
+
 
     if (!authHeaderValue.startsWith('Bearer')) {
       throw new HttpErrors.Unauthorized(
