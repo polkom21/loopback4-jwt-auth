@@ -4,6 +4,7 @@
 // License text available at https://opensource.org/licenses/MIT
 
 import {UserProfile} from '@loopback/security';
+import {AccessToken} from '../models';
 
 /**
  * An interface for generating and verifying a token
@@ -16,7 +17,7 @@ export interface TokenService {
    *
    * @returns The UserProfile which belongs to the given token.
    */
-  verifyToken(token: string): Promise<UserProfile>;
+  verifyToken(token: string, accessToken: AccessToken | null): Promise<UserProfile>;
 
   /**
    * Generates a token string based on a user profile
@@ -25,7 +26,7 @@ export interface TokenService {
    *
    * @returns a generated token/secret for a given UserProfile.
    */
-  generateToken(userProfile: UserProfile): Promise<string>;
+  generateToken(userProfile: UserProfile, accessToken: AccessToken | null): Promise<string>;
 
   /**
    * Revokes a given token (if supported by token system)

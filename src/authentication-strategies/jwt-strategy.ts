@@ -3,13 +3,17 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-import {asAuthStrategy, AuthenticationBindings, AuthenticationStrategy, TokenService} from '@loopback/authentication';
+import {asAuthStrategy, AuthenticationBindings, AuthenticationStrategy} from '@loopback/authentication';
 import {bind, BindingScope, inject} from '@loopback/context';
 import {extensionPoint} from '@loopback/core';
 import {asSpecEnhancer, mergeSecuritySchemeToSpec, OASEnhancer, OpenApiSpec} from '@loopback/openapi-v3';
+import {repository} from '@loopback/repository';
 import {HttpErrors, Request} from '@loopback/rest';
 import {UserProfile} from '@loopback/security';
+import jwt from 'jsonwebtoken';
 import {TokenServiceBindings} from '../keys';
+import {AccessTokenRepository} from '../repositories';
+import {TokenService} from '../services/token.service';
 
 // @bind(asAuthStrategy, asSpecEnhancer)
 @bind(asAuthStrategy, asSpecEnhancer)
@@ -21,11 +25,24 @@ export class JWTAuthenticationStrategy
   constructor(
     @inject(TokenServiceBindings.TOKEN_SERVICE)
     public tokenService: TokenService,
-  ) {}
+    @repository(AccessTokenRepository)
+    private accessTokenRepository: AccessTokenRepository,
+  ) { }
 
   async authenticate(request: Request): Promise<UserProfile | undefined> {
     const token: string = this.extractCredentials(request);
-    const userProfile: UserProfile = await this.tokenService.verifyToken(token);
+    // Get accessToken
+    interface DecodedTokenInterface {id: number, kid: number | undefined}
+    const decodedToken: DecodedTokenInterface = <DecodedTokenInterface>await jwt.decode(token);
+    let accessToken;
+
+    try {
+      accessToken = await this.accessTokenRepository.getAccessToken(decodedToken.kid, decodedToken.id, request.headers['user-agent'] || '');
+    } catch (error) {
+      throw new HttpErrors.Unauthorized(`Authorization header invalid`);
+    }
+
+    const userProfile: UserProfile = await this.tokenService.verifyToken(token, accessToken);
     return userProfile;
   }
 

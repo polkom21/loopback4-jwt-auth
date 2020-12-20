@@ -1,14 +1,15 @@
 // Uncomment these imports to begin using these cool features!
 
-import {authenticate, TokenService} from '@loopback/authentication';
+import {authenticate} from '@loopback/authentication';
 import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {get, getModelSchemaRef, HttpErrors, post, requestBody} from '@loopback/rest';
+import {get, getModelSchemaRef, HttpErrors, post, Request, requestBody, RestBindings} from '@loopback/rest';
 import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import {PasswordHasherBindings, TokenServiceBindings, UserServiceBindings} from '../keys';
 import {User} from '../models';
-import {Credentials, UserRepository} from '../repositories';
+import {AccessTokenRepository, Credentials, UserRepository} from '../repositories';
 import {PasswordHasher} from '../services/hash.password.bcryptjs';
+import {TokenService} from '../services/token.service';
 import {MyUserService} from '../services/user-service';
 import {validateCredentials} from '../services/validator';
 
@@ -24,6 +25,10 @@ export class UserController {
     public tokenService: TokenService,
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public passwordHasher: PasswordHasher,
+    @repository(AccessTokenRepository)
+    public accessTokenRepository: AccessTokenRepository,
+    @inject(RestBindings.Http.REQUEST)
+    private req: Request,
   ) { }
 
   @post('/users', {
@@ -112,7 +117,6 @@ export class UserController {
   ): Promise<UserProfile> {
     currentUserProfile.id = currentUserProfile[securityId];
     currentUserProfile[securityId];
-    console.log(currentUserProfile);
     return currentUserProfile;
   }
 
@@ -152,7 +156,9 @@ export class UserController {
 
     const userProfile = this.userService.convertToUserProfile(user);
 
-    const authToken = await this.tokenService.generateToken(userProfile);
+    const accessToken = await this.accessTokenRepository.newLoginAccess(user.id, this.req.headers['user-agent'] || 'undefined');
+
+    const authToken = await this.tokenService.generateToken(userProfile, accessToken);
 
     return {authToken}
   }

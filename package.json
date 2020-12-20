@@ -65,6 +65,7 @@
     "@loopback/eslint-config": "^10.0.4",
     "@loopback/testlab": "^3.2.10",
     "@types/bcryptjs": "^2.4.2",
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^10.17.48",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",

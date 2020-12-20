@@ -3,12 +3,12 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-import {TokenService, UserService} from '@loopback/authentication';
+import {UserService} from '@loopback/authentication';
 import {BindingKey} from '@loopback/context';
 import {User} from './models';
 import {Credentials} from './repositories';
 import {PasswordHasher} from './services/hash.password.bcryptjs';
-
+import {TokenService} from './services/token.service';
 export namespace TokenServiceConstants {
   export const TOKEN_SECRET_VALUE = 'myjwts3cr3t';
   export const TOKEN_EXPIRES_IN_VALUE = '600';
