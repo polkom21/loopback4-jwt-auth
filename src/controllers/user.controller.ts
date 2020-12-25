@@ -3,7 +3,7 @@
 import {authenticate} from '@loopback/authentication';
 import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {get, getModelSchemaRef, HttpErrors, post, Request, requestBody, RestBindings} from '@loopback/rest';
+import {del, get, getModelSchemaRef, HttpErrors, post, Request, requestBody, RestBindings} from '@loopback/rest';
 import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import {PasswordHasherBindings, TokenServiceBindings, UserServiceBindings} from '../keys';
 import {User} from '../models';
@@ -29,7 +29,7 @@ export class UserController {
     public accessTokenRepository: AccessTokenRepository,
     @inject(RestBindings.Http.REQUEST)
     private req: Request,
-  ) { }
+  ) {}
 
   @post('/users', {
     description: 'Register new user',
@@ -161,5 +161,31 @@ export class UserController {
     const authToken = await this.tokenService.generateToken(userProfile, accessToken);
 
     return {authToken}
+  }
+
+  @del('/logout', {
+    security: [{jwt: []}],
+    responses: {
+      '200': {
+        description: 'Logout',
+        content: {
+          schema: {
+            type: 'boolean'
+          }
+        }
+      }
+    }
+  })
+  @authenticate('jwt')
+  async logout(
+    @inject(SecurityBindings.USER)
+    currentUserProfile: UserProfile
+  ): Promise<boolean> {
+    currentUserProfile.id = currentUserProfile[securityId];
+    console.log(currentUserProfile);
+    await this.accessTokenRepository.updateById(currentUserProfile.kid, {
+      active: false
+    })
+    return true;
   }
 }

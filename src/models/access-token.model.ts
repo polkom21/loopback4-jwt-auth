@@ -41,6 +41,11 @@ export class AccessToken extends Entity {
   })
   lastUsage: string;
 
+  @property({
+    type: 'boolean',
+    default: true,
+  })
+  active: boolean;
 
   constructor(data?: Partial<AccessToken>) {
     super(data);

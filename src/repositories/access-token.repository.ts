@@ -35,6 +35,7 @@ export class AccessTokenRepository extends DefaultCrudRepository<
       where: {
         id: keyId,
         userId,
+        active: true,
       }
     })
 
@@ -43,6 +44,9 @@ export class AccessTokenRepository extends DefaultCrudRepository<
     const lastSavedUserAgent = regexpBrowser.exec(accessToken?.userAgent || '') || 'last';
 
     if (currentUserAgent[0] !== lastSavedUserAgent[0]) {
+      this.updateById(accessToken?.id, {
+        active: false,
+      })
       return Promise.reject('Invalid key')
     }
 
