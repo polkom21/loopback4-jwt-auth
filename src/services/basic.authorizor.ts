@@ -6,7 +6,7 @@
 import {
   AuthorizationContext,
   AuthorizationDecision,
-  AuthorizationMetadata,
+  AuthorizationMetadata
 } from '@loopback/authorization';
 import {securityId, UserProfile} from '@loopback/security';
 import _ from 'lodash';
@@ -59,14 +59,18 @@ export async function basicAuthorization(
     return AuthorizationDecision.ALLOW;
   }
 
+  if (roleIsAllowed) {
+    return AuthorizationDecision.ALLOW;
+  }
+
   /**
    * Allow access only to model owners, using route as source of truth
    *
    * eg. @post('/users/{userId}/orders', ...) returns `userId` as args[0]
    */
-  if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]) {
-    return AuthorizationDecision.ALLOW;
-  }
+  // if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]) {
+  //   return AuthorizationDecision.ALLOW;
+  // }
 
   return AuthorizationDecision.DENY;
 }
