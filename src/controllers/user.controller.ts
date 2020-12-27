@@ -1,6 +1,7 @@
 // Uncomment these imports to begin using these cool features!
 
 import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
 import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
 import {del, get, getModelSchemaRef, HttpErrors, post, Request, requestBody, RestBindings} from '@loopback/rest';
@@ -8,6 +9,7 @@ import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import {PasswordHasherBindings, TokenServiceBindings, UserServiceBindings} from '../keys';
 import {User} from '../models';
 import {AccessTokenRepository, Credentials, UserRepository} from '../repositories';
+import {basicAuthorization} from '../services/basic.authorizor';
 import {PasswordHasher} from '../services/hash.password.bcryptjs';
 import {TokenService} from '../services/token.service';
 import {MyUserService} from '../services/user-service';
@@ -111,6 +113,7 @@ export class UserController {
     }
   })
   @authenticate('jwt')
+  @authorize({allowedRoles: ['user'], voters: [basicAuthorization]})
   async me(
     @inject(SecurityBindings.USER)
     currentUserProfile: UserProfile

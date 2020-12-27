@@ -1,5 +1,5 @@
 import {AuthenticationComponent, registerAuthenticationStrategy} from '@loopback/authentication';
-import {AuthorizationComponent} from '@loopback/authorization';
+import {AuthorizationBindings, AuthorizationComponent, AuthorizationDecision, AuthorizationOptions} from '@loopback/authorization';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig, BindingKey} from '@loopback/core';
 import {RepositoryMixin} from '@loopback/repository';
@@ -34,6 +34,12 @@ export class JWTAuthApplication extends BootMixin(
 
     this.setUpBindings();
 
+    const authorizationOptions: AuthorizationOptions = {
+      precedence: AuthorizationDecision.DENY,
+      defaultDecision: AuthorizationDecision.DENY,
+    }
+
+    this.configure(AuthorizationBindings.COMPONENT).to(authorizationOptions)
     this.component(AuthenticationComponent)
     this.component(AuthorizationComponent)
 
